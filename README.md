@@ -1,5 +1,5 @@
 # Automating-aws-with-python
-## Publish a website to s3
+## Hosting a static website
 ### webotron
 webotron is a scipt that will sync a local directory to an S3 bucket
 
