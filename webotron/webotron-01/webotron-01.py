@@ -9,13 +9,43 @@ import click
 
 import mimetypes
 from bucket import BucketManager
-session=boto3.Session(profile_name='python_automation')
-bucket_manager=BucketManager(session)
+
 #s3=session.resource('s3')
+##bucket_manager=None
+#@click.group()
+#@click.option('--profile',default=None,help="use a given aws profile")
+#def cli(profile):
+    #"Webotron deploys website to AWS"
+    #global session,bucket_manager
+    #session_cfg={}
+    #if profile:
+        #session.cfg['profile_name']=profile
+    #session=boto3.Session(**session_cfg)
 @click.group()
-def cli():
-    "Webotron deploys website to AWS"
-    pass
+@click.option('--profile', default=None,
+              help="Use a given AWS profile.")
+def cli(profile):
+    """Webotron deploys websites to AWS."""
+    global session, bucket_manager 
+
+    session_cfg = {}
+    if profile:
+        session_cfg['profile_name'] = profile
+
+    session = boto3.Session(**session_cfg)
+    bucket_manager = BucketManager(session)
+    #domain_manager = DomainManager(session)
+    #cert_manager = CertificateManager(session)
+    #dist_manager = DistributionManager(session)
+    #bucket_manager=BucketManager(session)
+
+
+
+
+
+
+
+
 @cli.command("list-buckets")
 def list_buckets():
     "List all S3 buckets"
