@@ -2,9 +2,12 @@ import mimetypes
 from pathlib import Path
 from botocore.exceptions import ClientError
 import util
+from hashlib import md5
+
 '''classes for s3 buckets'''
 class BucketManager:
     '''Manage an S3 bucket'''
+    CHUNK_SIZE = 8388608
     def __init__(self,session):
         #self.name=name
         self.session=session
@@ -21,7 +24,7 @@ class BucketManager:
         """Get the website URL for this bucket."""
         return "http://{}.{}".format(
             bucket.name,
-            util.get_endpoint(self.get_region_name(bucket)).host)    
+            util.get_endpoint(self.get_region_name(bucket)).host)
 
 
 
@@ -75,12 +78,56 @@ class BucketManager:
     def configure_website(self,bucket):
         ws=bucket.Website()
         ws.put(WebsiteConfiguration={'ErrorDocument':{'Key':'error.html'},'IndexDocument':{'Suffix':'index.html'}})
+
+    def load_manifest(self, bucket):
+        """Load manifest for caching purposes."""
+        paginator = self.s3.meta.client.get_paginator('list_objects_v2')
+        for page in paginator.paginate(Bucket=bucket.name):
+            for obj in page.get('Contents', []):
+                self.manifest[obj['Key']] = obj['ETag']
+
+    @staticmethod
+    def hash_data(data):
+        """Generate md5 hash for data."""
+        hash = md5()
+        hash.update(data)
+        return hash
+
+    def gen_etag(self, path):
+        """Generate etag for file."""
+        hashes = []
+
+        with open(path, 'rb') as f:
+            while True:
+                data = f.read(self.CHUNK_SIZE)
+
+                if not data:
+                    break
+
+                hashes.append(self.hash_data(data))
+
+        if not hashes:
+            return
+        elif len(hashes) == 1:
+            return '"{}"'.format(hashes[0].hexdigest())
+        else:
+            digests = (h.digest() for h in hashes)
+            hash = self.hash_data(reduce(lambda x, y: x + y, digests))
+            return '"{}-{}"'.format(hash.hexdigest(), len(hashes))
+
+
+
     def upload_file(self,bucket,path,key):
         content_type = mimetypes.guess_type(key)[0] or 'text/plain'
         return bucket.upload_file(path,key,ExtraArgs={'ContentType':'text/html'})
 
+
+
+
+
     def sync(self,pathname,bucket):
         bucket=self.s3.Bucket(bucket)
+         self.load_manifest(bucket)
         root=Path(pathname).expanduser().resolve()
         def handle_directory(target):
             for p in target.iterdir():
