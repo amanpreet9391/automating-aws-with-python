@@ -1,7 +1,7 @@
 import mimetypes
 from pathlib import Path
 from botocore.exceptions import ClientError
-import util
+from webotron1 import util
 from hashlib import md5
 
 '''classes for s3 buckets'''
@@ -127,7 +127,7 @@ class BucketManager:
 
     def sync(self,pathname,bucket):
         bucket=self.s3.Bucket(bucket)
-         self.load_manifest(bucket)
+        self.load_manifest(bucket)
         root=Path(pathname).expanduser().resolve()
         def handle_directory(target):
             for p in target.iterdir():

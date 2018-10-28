@@ -3,15 +3,11 @@ verify_ssl = true
 url = "https://pypi.org/simple"
 name = "pypi"
 
+[packages]
+"boto3" = "*"
+
 [requires]
 python_version = "3.5"
 
 [dev-packages]
 ipython = "*"
-pycodestyle = "*"
-pydocstyle = "*"
-setuptools = "*"
-
-[packages]
-"boto3" = "*"
-click = "*"
