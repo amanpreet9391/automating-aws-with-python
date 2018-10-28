@@ -13,3 +13,4 @@ webotron is a scipt that will sync a local directory to an S3 bucket
 ### 02-notifon
 Notifon is a project to notify slack users of changes in your aws account using Cloud Watch events.
 ### Features
+send notification to slack

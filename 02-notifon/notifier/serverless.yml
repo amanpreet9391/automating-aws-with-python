@@ -19,7 +19,7 @@ service: notifon-notifier # NOTE: update this with your service name
 
 provider:
   name: aws
-  runtime: python3.6
+  runtime: python3.5
   profile: ${file(../config.${self:provider.stage}.json):notifier.profile}
   region: us-east-2
   environment:
@@ -120,3 +120,6 @@ functions:
 #       Value: "Some output value"
 #plugins:
   #- serverless-python-requirements
+
+plugins:
+  - serverless-python-requirements

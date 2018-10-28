@@ -1,3 +1,5 @@
+config.dev.json
+*.pem
 # Distribution / packaging
 .Python
 env/
